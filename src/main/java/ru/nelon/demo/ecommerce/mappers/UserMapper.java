@@ -4,7 +4,7 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-import ru.nelon.demo.ecommerce.dto.user.UserCreateDto;
+import ru.nelon.demo.ecommerce.dto.user.RegisterUserDto;
 import ru.nelon.demo.ecommerce.dto.user.UserDto;
 import ru.nelon.demo.ecommerce.entities.User;
 
@@ -13,10 +13,10 @@ public interface UserMapper {
 	
 	UserDto toDto(User user);
 	
-	User toEntity(UserCreateDto dto);
+	User toEntity(RegisterUserDto dto);
 	
 	@BeanMapping(
 		nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 	)
-	void updateUserFromDto(UserCreateDto dto, @MappingTarget User user);
+	void updateUserFromDto(RegisterUserDto dto, @MappingTarget User user);
 }
