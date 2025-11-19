@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface IProductService {
 	
-	List<ProductDto> getProducts();
+	List<ProductDto> getProducts(Byte categoryId);
 	
 	ProductDto getProductById(Long id);
 	

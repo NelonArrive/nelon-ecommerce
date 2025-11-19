@@ -22,9 +22,14 @@ public class ProductService implements IProductService {
 	private final ProductMapper productMapper;
 	
 	@Override
-	public List<ProductDto> getProducts() {
-		return productRepository.findAll()
-			.stream().map(productMapper::toDto).toList();
+	public List<ProductDto> getProducts(Byte categoryId) {
+		List<Product> products;
+		if (categoryId != null) {
+			products = productRepository.findByCategoryId(categoryId);
+		} else {
+			products = productRepository.findAll();
+		}
+		return products.stream().map(productMapper::toDto).toList();
 	}
 	
 	@Override

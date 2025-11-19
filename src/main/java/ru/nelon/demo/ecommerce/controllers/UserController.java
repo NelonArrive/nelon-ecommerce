@@ -1,11 +1,15 @@
 package ru.nelon.demo.ecommerce.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import ru.nelon.demo.ecommerce.dto.user.UserCreateDto;
+import ru.nelon.demo.ecommerce.dto.user.ChangePasswordRequest;
+import ru.nelon.demo.ecommerce.dto.user.RegisterUserDto;
 import ru.nelon.demo.ecommerce.dto.user.UserDto;
 import ru.nelon.demo.ecommerce.dto.user.UserUpdateDto;
+import ru.nelon.demo.ecommerce.entities.User;
 import ru.nelon.demo.ecommerce.services.UserService;
 
 import java.util.List;
@@ -16,6 +20,7 @@ import java.util.List;
 public class UserController {
 	
 	private final UserService userService;
+	private final PasswordEncoder passwordEncoder;
 	
 	@GetMapping()
 	public ResponseEntity<List<UserDto>> getUsers() {
@@ -28,8 +33,8 @@ public class UserController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<UserDto> createUser(@RequestBody UserCreateDto dto) {
-		return ResponseEntity.ok(userService.createUser(dto));
+	public ResponseEntity<UserDto> createUser(@RequestBody RegisterUserDto dto) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(dto));
 	}
 	
 	@PutMapping("/{id}")
@@ -44,4 +49,23 @@ public class UserController {
 		userService.deleteUserById(id);
 		return ResponseEntity.noContent().build();
 	}
+	
+	@PostMapping("/{id}/change-password")
+	public ResponseEntity<Void> changePassword(
+		@PathVariable Long id,
+		@RequestBody ChangePasswordRequest dto
+	) {
+		User user = userService.getUserEntityById(id);
+		if (user == null) {
+			return ResponseEntity.noContent().build();
+		}
+		if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+		
+		userService.changePassword(id, dto.getNewPassword());
+		
+		return ResponseEntity.noContent().build();
+	}
 }
+

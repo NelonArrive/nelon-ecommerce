@@ -1,8 +1,9 @@
 package ru.nelon.demo.ecommerce.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.nelon.demo.ecommerce.dto.user.UserCreateDto;
+import ru.nelon.demo.ecommerce.dto.user.RegisterUserDto;
 import ru.nelon.demo.ecommerce.dto.user.UserDto;
 import ru.nelon.demo.ecommerce.dto.user.UserUpdateDto;
 import ru.nelon.demo.ecommerce.entities.User;
@@ -19,6 +20,7 @@ public class UserService implements IUserService {
 	
 	private final UserRepository userRepository;
 	private final UserMapper userMapper;
+	private final PasswordEncoder passwordEncoder;
 	
 	@Override
 	public List<UserDto> getUsers() {
@@ -36,8 +38,13 @@ public class UserService implements IUserService {
 		return userMapper.toDto(user);
 	}
 	
+	public User getUserEntityById(Long id) {
+		return userRepository.findById(id)
+			.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+	}
+	
 	@Override
-	public UserDto createUser(UserCreateDto dto) {
+	public UserDto createUser(RegisterUserDto dto) {
 		User user = userMapper.toEntity(dto);
 		User saved = userRepository.save(user);
 		return userMapper.toDto(saved);
@@ -62,7 +69,15 @@ public class UserService implements IUserService {
 		if (!userRepository.existsById(id)) {
 			throw new ResourceNotFoundException("User not found");
 		}
-		
 		userRepository.deleteById(id);
+	}
+	
+	@Override
+	public void changePassword(Long id, String newPassword) {
+		User user = userRepository.findById(id).orElseThrow(() ->
+			new RuntimeException("User not found")
+		);
+		user.setPassword(passwordEncoder.encode(newPassword));
+		userRepository.save(user);
 	}
 }
